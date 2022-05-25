@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Mexican Pizza Locator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script src="{{ url_for('static', filename='js/universal.js') }}" /></script>
+
+</head>
+
+<body>
+  <h1 class="text-center">Mexican Pizza Locator 🍕 </h1>
+  <p class="text-center">It just got back and it's always out of stock! Enter your zipcode here to see if the mexican pizza is back in stock near you :) </p>
+  <div class="row justify-content-center">
+      <form class="form-inline"  id='zip_code_form' action="javascript:getLocations()" >
+        <div class="form-group mb-2">
+          <label for="zip_code" class="sr-only">Zip Code</label>
+          <input type="text" class="form-control" name="zip_code" id="zip_code" placeholder="Enter ZipCode">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Submit</button>
+      </form>
+      <div id='spinner' class="spinner-border" role="status">
+        <span class="visually-hidden"</span>
+      </div>
+  </div>
+
+
+  <div id="test-map" name='test-map' style="height: 80vh;"></div>
+
+  
+
+  <script>
+
+    var map = L.map('test-map').setView([37.3861, -122.0839], 12)
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            map.panTo(L.latLng(position.coords.latitude, position.coords.longitude))
+        })
+    }
+    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+        attribution: 'Open street map'
+    }).addTo(map)
+
+    var MapIcon = L.Icon.extend({
+        options: {
+          iconSize:     [40, 40],
+          shadowSize:   [50, 64],
+          iconAnchor:   [22, 94],
+          shadowAnchor: [4, 62],
+          popupAnchor:  [-3, -76]
+        }
+    });
+
+    var pizzaIcon = new MapIcon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3595/3595458.png',
+})
+
+var sadIcon = new MapIcon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/599/599426.png',
+})
+var layerGroup = L.layerGroup().addTo(map);
+
+
+var spinnerElem = document.getElementById("spinner");
+spinnerElem.style.display = "none";
+    function getLocations() {
+      const form = document.getElementById('zip_code_form');
+      const zip_code = form['zip_code'].value
+      spinnerElem.style.display = "block";
+      axios.get('http://127.0.0.1:8080/geojson-features?zip_code='+zip_code)
+        .then(response => {
+           layerGroup.clearLayers();
+            console.log(response.data);
+            // map.geoJSON(response.data, {}).addTo(map);
+            console.log('hi')
+            var data = response.data 
+            map.panTo(L.latLng(response.data[0]['lat'],response.data[0]['lng']))
+            for (var i = 0; i < response.data.length; i++) {
+                let currIcon = sadIcon;
+                if(response.data[i]['has_pizza']){
+                  currIcon = pizzaIcon;
+                }
+                marker = new L.marker([response.data[i]['lat'], response.data[i]['lng']], {icon: currIcon})
+                  .bindPopup(response.data[i]['popup']).openPopup()
+                  .addTo(layerGroup);
+            }
+            spinnerElem.style.display = "none";
+        })  
+    }
+
+  </script>
+
+    <!-- {{map | safe }} -->
+  
+
+ 
+
+</body>
+
+</html>
