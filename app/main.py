@@ -1,10 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from mexican_pizza_utils import return_fmt_mexican_pizza_resp_by_zip_code
 from icons import pizza, sad_face
-import folium 
-from folium.features import CustomIcon
 import os 
-import base64
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))   # refers to application_top
 APP_STATIC = os.path.join(APP_ROOT, 'static')
