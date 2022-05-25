@@ -43,7 +43,7 @@ def return_fmt_mexican_pizza_resp_by_zip_code(zip_code):
         popup= v['address']['line1'] + " does not have the mexican pizza."
         has_pizza = False
         if v['has_veggie_pizza'] or v['has_meat_pizza']:
-            popup= v['address']['line1'] + "has the mexican pizza!"
+            popup= v['address']['line1'] + " has the mexican pizza!"
             has_pizza = True
         curr_store = {
             'lat':v["lat"],
