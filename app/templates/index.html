@@ -31,16 +31,19 @@
   <h1 class="text-center text-light" style="padding-top:2%;">Mexican Pizza Locator 🍕 </h1>
   <p class="text-center text-light">It just got back and it's always out of stock! Enter your zipcode here to see if the mexican pizza is back in stock near you :) </p>
   <!-- <div class="row justify-content-center"> -->
-      <form class="form-inline justify-content-center"  id='zip_code_form' action="javascript:getLocations()" >
-        <div class="form-group mb-2">
-          <label for="zip_code" class="sr-only">Zip Code</label>
-          <input type="text" class="form-control" name="zip_code" id="zip_code" placeholder="Enter ZipCode" style="padding-right:10px;">
+  <form class="form-inline justify-content-center"  id='zip_code_form' action="javascript:getLocations()" >
+    <div class="form-group mb-2">
+      <label for="zip_code" class="sr-only">Zip Code</label>
+      <input type="text" class="form-control" name="zip_code" id="zip_code" placeholder="Enter ZipCode" style="padding-right:10px;">
+    </div>
+    <button type="submit" class="btn btn-primary mb-2" style="margin-left:10px;">Submit</button>
+  </form>
+      <div class="row justify-content-center text-light" style="padding-top:5px;padding-bottom:5px;">
+        <div id='spinner' class="spinner-border text-light justify-content-center text-center" role="status">
+          <span class="visually-hidden text-light justify-content-center text-center" ></span>
         </div>
-        <button type="submit" class="btn btn-primary mb-2" style="margin-left:10px;">Submit</button>
-      </form>
-      <div id='spinner' class="spinner-border" role="status">
-        <span class="visually-hidden"</span>
       </div>
+
   <!-- </div> -->
 
   <div class="text-center">
