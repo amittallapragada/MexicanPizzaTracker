@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import requests 
 import xmltodict, json
+from functools import lru_cache
 
 #Get zipcode data
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))   # refers to application_top
@@ -35,9 +36,12 @@ def first(iterable, default=None):
         return item
     return default
 
-
+@lru_cache(maxsize=128)
 def return_fmt_mexican_pizza_resp_by_zip_code(zip_code):
     stores = get_mexican_pizza_status_by_zip(zip_code)
+    print("stores: ", stores)
+    if "error" in stores.keys():
+        return stores
     output = []
     for k,v in stores.items():
         popup= v['address']['line1'] + " does not have the mexican pizza."
@@ -57,6 +61,8 @@ def return_fmt_mexican_pizza_resp_by_zip_code(zip_code):
 def get_mexican_pizza_status_by_zip(zip_code):
     zip_code = int(zip_code)
     stores = get_nearby_stores_by_zip(zip_code)
+    if(type(stores) == dict):
+        return stores
     store_output = {}
     for store in stores:
         store_data = {"lat":store["geoPoint"]["latitude"], "lng":store["geoPoint"]["longitude"], "address":store["address"], "has_veggie_pizza":False, "has_meat_pizza":False}
@@ -80,8 +86,9 @@ def get_mexican_pizza_status_by_zip(zip_code):
 
 def get_nearby_stores_by_zip(zip_code):
     output = zip_code_df[zip_code_df.zip == zip_code]
-    if len(output) <= 0:
-        return "Error"
+    print('OUTPUT: ', output)
+    if output.empty:
+        return {"error":"Zip code code not found. Please try another"}
     if(len(output)) > 1:
         output = output[0]
     return get_nearby_stores_by_lat_lng(output["lat"], output["lng"])
@@ -90,7 +97,7 @@ def get_nearby_stores_by_lat_lng(lat, lng):
     resp = requests.get(STORE_LOCATOR_URL, params={"latitude":lat, "longitude":lng}, headers=TACO_BELL_HEADERS)
     parsed_resp = xmltodict.parse(resp.text)
     if "nearByStores" not in parsed_resp['storeFinderSearchPage']:
-        return None 
+        return {"error":"No Taco Bells found near you."} 
     else:
         return parsed_resp['storeFinderSearchPage']["nearByStores"]
 
