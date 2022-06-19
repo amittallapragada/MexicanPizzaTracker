@@ -1,5 +1,5 @@
 import os 
-import pandas as pd
+from zip_code_utils import *
 import requests 
 import xmltodict, json
 from functools import lru_cache
@@ -8,7 +8,6 @@ from functools import lru_cache
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))   # refers to application_top
 APP_STATIC = os.path.join(APP_ROOT, 'static')
 ZIP_CODE_FILE_DIR = APP_STATIC + "/files/uszips.csv"
-zip_code_df = pd.read_csv(ZIP_CODE_FILE_DIR)
 
 #taco bell api data
 TACO_BELL_HEADERS = {
@@ -44,6 +43,7 @@ def return_fmt_mexican_pizza_resp_by_zip_code(zip_code):
         return stores
     output = []
     for k,v in stores.items():
+        print(v)
         popup= v['address']['line1'] + " does not have the mexican pizza."
         has_pizza = False
         if v['has_veggie_pizza'] or v['has_meat_pizza']:
@@ -60,7 +60,11 @@ def return_fmt_mexican_pizza_resp_by_zip_code(zip_code):
 
 def get_mexican_pizza_status_by_zip(zip_code):
     zip_code = int(zip_code)
-    stores = get_nearby_stores_by_zip(zip_code)
+    locn = get_lat_lon_from_zip_code(zip_code)
+    if len(locn) < 2:
+        return locn
+
+    stores = get_nearby_stores_by_lat_lng(locn[0], locn[1])
     if(type(stores) == dict):
         return stores
     store_output = {}
@@ -83,15 +87,6 @@ def get_mexican_pizza_status_by_zip(zip_code):
             print("broke for store: ", store_num)
     return store_output
 
-
-def get_nearby_stores_by_zip(zip_code):
-    output = zip_code_df[zip_code_df.zip == zip_code]
-    print('OUTPUT: ', output)
-    if output.empty:
-        return {"error":"Zip code code not found. Please try another"}
-    if(len(output)) > 1:
-        output = output[0]
-    return get_nearby_stores_by_lat_lng(output["lat"], output["lng"])
 
 def get_nearby_stores_by_lat_lng(lat, lng):
     resp = requests.get(STORE_LOCATOR_URL, params={"latitude":lat, "longitude":lng}, headers=TACO_BELL_HEADERS)
