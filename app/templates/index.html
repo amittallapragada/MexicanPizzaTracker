@@ -109,7 +109,7 @@ errorElem.style.display = "none";
       const form = document.getElementById('zip_code_form');
       const zip_code = form['zip_code'].value
       spinnerElem.style.display = "block";
-      axios.get(api_url + 'geojson-features?zip_code='+zip_code)
+      axios.get(api_url + 'geojson-features?zip_code='+zip_code+'&store=Taco+Bell&item=Mexican+Pizza')
         .then(response => {
            layerGroup.clearLayers();
             console.log(response.data);

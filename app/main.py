@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from mexican_pizza_utils import return_fmt_mexican_pizza_resp_by_zip_code
+from restaurant_accessor import *
 
 app=Flask(__name__)
 
@@ -9,8 +9,12 @@ def root():
 
 @app.route('/geojson-features', methods=['GET'])
 def get_all_points():
+    product = {
+        'store' : request.args.get('store'),
+        'product_name' : request.args.get('item')
+    }
     zip_code = request.args.get('zip_code')
-    markers = return_fmt_mexican_pizza_resp_by_zip_code(zip_code)
+    markers = get_stores_for_product_by_zip_code(zip_code,product)
     #error messages
     if type(markers) == dict and "error" in markers.keys():
         markers = {"status":"failure", "error":markers}
