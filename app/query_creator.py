@@ -21,9 +21,6 @@ class QueryCreator:
         elif self.store == SUPPORTED_RESTAURANTS["STARBUCKS"]:
             handler = StarBucksZipCodeResults(zip_code=self.zip_code)
         for item in self.item.item_ids:
-            stores.append(handler.get_stores_with_item(item))
-        return {"stores":stores, "item_icon":self.item.icon}
+            stores.extend(handler.get_stores_with_item(item))
+        return {"stores":stores, "item_icon":self.item.icon, "item_name":self.item.name}
 
-
-test = QueryCreator(zip_code=94041, store="TACO_BELL", item="MEXICAN_PIZZA")
-print(test.query_for_item_by_store())

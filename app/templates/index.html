@@ -112,18 +112,18 @@ errorElem.style.display = "none";
       axios.get(api_url + 'geojson-features?zip_code='+zip_code+'&store=Taco+Bell&item=Mexican+Pizza')
         .then(response => {
            layerGroup.clearLayers();
-            console.log(response.data);
-            // map.geoJSON(response.data, {}).addTo(map);
-            console.log('hi')
             if(response.data['status'] === "success"){
-              map.panTo(L.latLng(response.data['markers'][0]['lat'],response.data['markers'][0]['lng']))
-              for (var i = 0; i < response.data.markers.length; i++) {
+              map.panTo(L.latLng(response.data['markers']['stores'][0]['lat'],response.data['markers']['stores'][0]['lon']))
+              for (var i = 0; i < response.data.markers.stores.length; i++) {
                   let currIcon = sadIcon;
-                  if(response.data.markers[i]['has_pizza']){
+                  let popUp = " does not have the "
+                  if(response.data.markers.stores[i]['available']){
                     currIcon = pizzaIcon;
+                    popUp = " does have the "
                   }
-                  marker = new L.marker([response.data.markers[i]['lat'], response.data.markers[i]['lng']], {icon: currIcon})
-                    .bindPopup(response.data.markers[i]['popup']).openPopup()
+                  let popUpMsg = response.data.markers.stores[i].address + popUp + response.data.markers.item_name 
+                  marker = new L.marker([response.data.markers.stores[i]['lat'], response.data.markers.stores[i]['lon']], {icon: currIcon})
+                    .bindPopup(popUpMsg).openPopup()
                     .addTo(layerGroup);
               }
 

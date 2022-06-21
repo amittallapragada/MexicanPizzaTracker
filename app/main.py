@@ -13,9 +13,9 @@ def get_all_points():
         'store' : request.args.get('store'),
         'product_name' : request.args.get('item')
     }
-    zip_code = request.args.get('zip_code')
-    
-    markers = get_stores_for_product_by_zip_code(zip_code,product)
+    zip_code = int(request.args.get('zip_code'))
+    markers = QueryCreator(zip_code=zip_code, store="TACO_BELL", item="MEXICAN_PIZZA").query_for_item_by_store()
+    # markers = get_stores_for_product_by_zip_code(zip_code,product)
     #error messages
     if type(markers) == dict and "error" in markers.keys():
         markers = {"status":"failure", "error":markers}
