@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
-from restaurant_accessor import *
-
+from restaurant_handlers.restaurant_accessor import *
+from query_creator import QueryCreator
 app=Flask(__name__)
 
 @app.route('/')
@@ -14,6 +14,7 @@ def get_all_points():
         'product_name' : request.args.get('item')
     }
     zip_code = request.args.get('zip_code')
+    
     markers = get_stores_for_product_by_zip_code(zip_code,product)
     #error messages
     if type(markers) == dict and "error" in markers.keys():

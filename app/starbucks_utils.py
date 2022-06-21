@@ -53,7 +53,3 @@ def get_nearby_stores(lat, lon):
     stores = resp_json["stores"]
     return stores
 
-if __name__ == "__main__":
-    #print(get_stores_zip_code(95135))
-    get_starbucks_stores_by_product(-1, 95135)
-
