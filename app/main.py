@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from restaurant_handlers.restaurant_accessor import *
 from query_creator import QueryCreator
 app=Flask(__name__)
-
+query_creator = QueryCreator()
 @app.route('/')
 def root():
     return render_template('index.html')
@@ -14,7 +14,7 @@ def get_all_points():
         'product_name' : request.args.get('item')
     }
     zip_code = int(request.args.get('zip_code'))
-    markers = QueryCreator(zip_code=zip_code, store="TACO_BELL", item="MEXICAN_PIZZA").query_for_item_by_store()
+    markers = query_creator.query_for_item_by_store(store="TACO_BELL", item_name="MEXICAN_PIZZA", zip_code=zip_code)
     # markers = get_stores_for_product_by_zip_code(zip_code,product)
     #error messages
     if type(markers) == dict and "error" in markers.keys():

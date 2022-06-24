@@ -44,7 +44,8 @@ class TacoBellStore(Store):
             return True
         else:
             return False
-    
+
+    @lru_cache()
     def get_menu(self):
         try:
             resp = requests.get(STORE_MENU_URL+self.store_id, headers=TACO_BELL_HEADERS) 
@@ -61,8 +62,11 @@ class TacoBellZipCodeResults(ZipCodeResults):
         self.lat = lat
         self.lon = lon
     
-    def get_stores(self):
-        locn = get_lat_lon_from_zip_code(self.zip_code)
+    def get_stores(self, zip_code):
+        if not zip_code:
+            locn = get_lat_lon_from_zip_code(self.zip_code)
+        else:
+            locn = get_lat_lon_from_zip_code(zip_code)
         resp = requests.get(STORE_LOCATOR_URL, params={"latitude":locn[0], "longitude":locn[1]}, headers=TACO_BELL_HEADERS)
         parsed_resp = xmltodict.parse(resp.text)
         if "nearByStores" not in parsed_resp['storeFinderSearchPage']:
