@@ -53,7 +53,6 @@ class ZipCodeResults:
     def get_stores(self, zip_code):
         pass 
 
-    @lru_cache(maxsize=128)
     def get_stores_with_item(self, item_id, zip_code):
         stores = self.get_stores(zip_code)
         output = [ {**store.to_dict(), **{"available":store.has_item(item_id)}} for store in stores]

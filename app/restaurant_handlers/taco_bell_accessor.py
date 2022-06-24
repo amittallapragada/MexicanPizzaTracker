@@ -2,7 +2,7 @@ import requests
 import xmltodict, json
 from restaurant_handlers.restaurant_accessor import Store, ZipCodeResults 
 from zip_code_utils import get_lat_lon_from_zip_code
-from functools import lru_cache
+import cachetools.func
 
 TACO_BELL_HEADERS = {
   'authority': 'www.tacobell.com',
@@ -45,7 +45,6 @@ class TacoBellStore(Store):
         else:
             return False
 
-    @lru_cache()
     def get_menu(self):
         try:
             resp = requests.get(STORE_MENU_URL+self.store_id, headers=TACO_BELL_HEADERS) 
@@ -62,6 +61,7 @@ class TacoBellZipCodeResults(ZipCodeResults):
         self.lat = lat
         self.lon = lon
     
+    @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
     def get_stores(self, zip_code):
         if not zip_code:
             locn = get_lat_lon_from_zip_code(self.zip_code)

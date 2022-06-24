@@ -2,6 +2,8 @@ import requests
 from restaurant_handlers.restaurant_accessor import Store, ZipCodeResults 
 from zip_code_utils import get_lat_lon_from_zip_code
 from functools import lru_cache
+import cachetools.func
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 locator_url = "https://www.starbucks.com/bff/locations?"
 menu_url = "https://www.starbucks.com/bff/ordering/menu?"
@@ -27,6 +29,7 @@ class StarbucksStore(Store):
         self.lon = lon
         self.address = address
         self.menu = {}
+        print("im parsing here: ", self.store_id)
         self.get_menu()
 
     def has_item(self, item_id):
@@ -44,7 +47,7 @@ class StarbucksStore(Store):
                     for product in pointer[i]['products']:
                         curr_items[product['productNumber']] = {'name':product['name'], 'available':True if product['availability'] == 'Available' else False}
                     self.menu = {**self.menu, **curr_items}
-                     
+        
     def get_menu(self):
         menu_resp = requests.get(menu_url, params = {"storeNumber" : self.store_id})
         menu = menu_resp.json()
@@ -56,13 +59,24 @@ class StarbucksStore(Store):
 
 
 class StarBucksZipCodeResults(ZipCodeResults):
-    def get_stores(self):
-        locn = get_lat_lon_from_zip_code(self.zip_code)
+
+    @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
+    def get_stores(self, zip_code):
+        locn = get_lat_lon_from_zip_code(zip_code)
         resp = requests.get(locator_url, params={"lat" : locn[0], "lng" : locn[1]}, headers = headers)
         resp_json = resp.json()
         stores = resp_json["stores"]
-        return [StarbucksStore(store_id=store["id"], lat=store["coordinates"]["latitude"], lon=store["coordinates"]["longitude"], address=store["address"]["streetAddressLine1"]) for store in stores]
-   
+        threads= []
+        parsed_stores = []
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            for store in stores:
+                print("threading sht")
+                threads.append(executor.submit(StarbucksStore(store_id=store["id"], lat=store["coordinates"]["latitude"], lon=store["coordinates"]["longitude"], address=store["address"]["streetAddressLine1"])))
+                
+            for task in as_completed(threads):
+                parsed_stores.append(task.result())
+        # return [StarbucksStore(store_id=store["id"], lat=store["coordinates"]["latitude"], lon=store["coordinates"]["longitude"], address=store["address"]["streetAddressLine1"]) for store in stores]
+        return parsed_stores
 
 
 
