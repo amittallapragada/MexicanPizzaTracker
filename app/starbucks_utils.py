@@ -46,6 +46,7 @@ def get_starbucks_stores_by_product(product, zip_code):
        menu =  get_menu_by_store(store["id"])
        print("new store who dis")
        print(menu)
+       break
 
 def get_nearby_stores(lat, lon):
     resp = requests.get(locator_url, params={"lat" : lat, "lng" : lon}, headers = headers)

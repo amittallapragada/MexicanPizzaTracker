@@ -33,7 +33,7 @@ class Store:
         pass 
     
     def get_menu(self):
-        pass 
+        pass
 
     def to_dict(self):
         return {
