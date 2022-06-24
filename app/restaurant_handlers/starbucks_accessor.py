@@ -29,7 +29,6 @@ class StarbucksStore(Store):
         self.lon = lon
         self.address = address
         self.menu = {}
-        print("im parsing here: ", self.store_id)
         self.get_menu()
 
     def has_item(self, item_id):
@@ -60,6 +59,10 @@ class StarbucksStore(Store):
 
 class StarBucksZipCodeResults(ZipCodeResults):
 
+    def create_store(self, store):
+        starbucks_store = StarbucksStore(store_id=store["id"], lat=store["coordinates"]["latitude"], lon=store["coordinates"]["longitude"], address=store["address"]["streetAddressLine1"])
+        return starbucks_store
+        
     @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
     def get_stores(self, zip_code):
         locn = get_lat_lon_from_zip_code(zip_code)
@@ -70,8 +73,7 @@ class StarBucksZipCodeResults(ZipCodeResults):
         parsed_stores = []
         with ThreadPoolExecutor(max_workers=20) as executor:
             for store in stores:
-                print("threading sht")
-                threads.append(executor.submit(StarbucksStore(store_id=store["id"], lat=store["coordinates"]["latitude"], lon=store["coordinates"]["longitude"], address=store["address"]["streetAddressLine1"])))
+                threads.append(executor.submit(self.create_store, store))
                 
             for task in as_completed(threads):
                 parsed_stores.append(task.result())

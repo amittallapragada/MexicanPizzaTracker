@@ -1,8 +1,10 @@
+from threading import Thread
 import requests 
 import xmltodict, json
 from restaurant_handlers.restaurant_accessor import Store, ZipCodeResults 
 from zip_code_utils import get_lat_lon_from_zip_code
 import cachetools.func
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 TACO_BELL_HEADERS = {
   'authority': 'www.tacobell.com',
@@ -61,6 +63,9 @@ class TacoBellZipCodeResults(ZipCodeResults):
         self.lat = lat
         self.lon = lon
     
+    def create_store(self, store):
+        current_store = TacoBellStore(store_id=store["storeNumber"], lat=store["geoPoint"]["latitude"], lon=store["geoPoint"]["longitude"], address=store['address']['line1'])
+        return current_store
     @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
     def get_stores(self, zip_code):
         if not zip_code:
@@ -72,9 +77,13 @@ class TacoBellZipCodeResults(ZipCodeResults):
         if "nearByStores" not in parsed_resp['storeFinderSearchPage']:
             return {"error":"No Taco Bells found near you."} 
         else:
-            stores = []
-            for store in parsed_resp['storeFinderSearchPage']["nearByStores"]:
-                current_store = TacoBellStore(store_id=store["storeNumber"], lat=store["geoPoint"]["latitude"], lon=store["geoPoint"]["longitude"], address=store['address']['line1'])
-                stores.append(current_store)
-            return stores
+            threads = []
+            parsed_stores = []
+            with ThreadPoolExecutor(max_workers=20) as executor:
+                for store in parsed_resp['storeFinderSearchPage']['nearByStores']:
+                    threads.append(executor.submit(self.create_store, store))
+                    
+                for task in as_completed(threads):
+                    parsed_stores.append(task.result())
+            return parsed_stores
     
