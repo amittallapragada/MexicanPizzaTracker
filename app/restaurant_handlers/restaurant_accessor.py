@@ -50,12 +50,11 @@ class ZipCodeResults:
         self.lat = lat
         self.lon = lon 
     
-    def get_stores(self):
+    def get_stores(self, zip_code):
         pass 
 
-    @lru_cache(maxsize=128)
-    def get_stores_with_item(self, item_id):
-        stores = self.get_stores()
+    def get_stores_with_item(self, item_id, zip_code):
+        stores = self.get_stores(zip_code)
         output = [ {**store.to_dict(), **{"available":store.has_item(item_id)}} for store in stores]
         return output 
 

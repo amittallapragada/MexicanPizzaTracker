@@ -3,24 +3,22 @@ from restaurant_handlers.taco_bell_accessor import TacoBellZipCodeResults
 from supported_restaurants import SUPPORTED_RESTAURANTS
 from supported_items import SUPPORTED_ITEMS
 
+
+
 class QueryCreator:
-    def __init__(self, zip_code, store, item):
-        self.zip_code = zip_code
-        if store in SUPPORTED_RESTAURANTS.keys():
-            self.store = store
-        else:
-            raise Exception("Store not supported")
-        if item in SUPPORTED_ITEMS.keys():
-            self.item = SUPPORTED_ITEMS[item]
+    def __init__(self):
+        self.taco_bell_handler = TacoBellZipCodeResults()
+        self.starbucks_handler = StarBucksZipCodeResults()
+
     
-    def query_for_item_by_store(self):
+    def query_for_item_by_store(self, store, item_name, zip_code):
+        item_obj = SUPPORTED_ITEMS[item_name]
         handler = None 
         stores = []
-        if self.store == SUPPORTED_RESTAURANTS["TACO_BELL"]:
-            handler = TacoBellZipCodeResults(zip_code=self.zip_code)
-        elif self.store == SUPPORTED_RESTAURANTS["STARBUCKS"]:
-            handler = StarBucksZipCodeResults(zip_code=self.zip_code)
-        for item in self.item.item_ids:
-            stores.extend(handler.get_stores_with_item(item))
-        return {"stores":stores, "item_icon":self.item.icon, "item_name":self.item.name}
-
+        if store == SUPPORTED_RESTAURANTS["TACO_BELL"]:
+            handler = self.taco_bell_handler
+        elif store == SUPPORTED_RESTAURANTS["STARBUCKS"]:
+            handler = self.starbucks_handler
+        for item in item_obj.item_ids:
+            stores.extend(handler.get_stores_with_item(item, zip_code))
+        return {"stores":stores, "item_icon":item_obj.icon, "item_name":item_obj.name}

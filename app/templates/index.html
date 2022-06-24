@@ -118,7 +118,9 @@ errorElem.style.display = "none";
                   let currIcon = sadIcon;
                   let popUp = " does not have the "
                   if(response.data.markers.stores[i]['available']){
-                    currIcon = pizzaIcon;
+                    currIcon = new MapIcon({
+                        iconUrl: response.data.markers.item_icon,
+                    })
                     popUp = " does have the "
                   }
                   let popUpMsg = response.data.markers.stores[i].address + popUp + response.data.markers.item_name 
