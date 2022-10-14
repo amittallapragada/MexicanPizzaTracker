@@ -32,6 +32,7 @@ class StarbucksStore(Store):
         self.get_menu()
 
     def has_item(self, item_id):
+        item_id = int(item_id)
         if item_id in self.menu:
             return self.menu[item_id]['available']
             
@@ -48,7 +49,10 @@ class StarbucksStore(Store):
                     self.menu = {**self.menu, **curr_items}
         
     def get_menu(self):
-        menu_resp = requests.get(menu_url, params = {"storeNumber" : self.store_id})
+        if self.store_id != "":
+            menu_resp = requests.get(menu_url, params = {"storeNumber" : self.store_id})
+        else:
+            menu_resp = requests.get(menu_url)
         menu = menu_resp.json()
         menus = menu['menus']
         for section in menus:
@@ -64,8 +68,13 @@ class StarBucksZipCodeResults(ZipCodeResults):
         return starbucks_store
         
     @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
-    def get_stores(self, zip_code):
-        locn = get_lat_lon_from_zip_code(zip_code)
+    def get_stores(self, zip_code=None, lat=None, lon=None):
+        if zip_code and not lat and not lon:
+            locn = get_lat_lon_from_zip_code(zip_code)
+        if not zip_code and lat and lon:
+            locn =[lat, lon]
+        if type(locn) == dict and 'error' in locn.keys():
+            return locn 
         resp = requests.get(locator_url, params={"lat" : locn[0], "lng" : locn[1]}, headers = headers)
         resp_json = resp.json()
         stores = resp_json["stores"]
@@ -79,6 +88,16 @@ class StarBucksZipCodeResults(ZipCodeResults):
                 parsed_stores.append(task.result())
         # return [StarbucksStore(store_id=store["id"], lat=store["coordinates"]["latitude"], lon=store["coordinates"]["longitude"], address=store["address"]["streetAddressLine1"]) for store in stores]
         return parsed_stores
+    
+    @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
+    def get_default_menu(self):
+        def_starbucks_store = StarbucksStore(store_id="")
+        raw_menu =  def_starbucks_store.get_menu()
+        products = []
+        for k,v in raw_menu.items():
+            products.append({"name":v['name'], "value":k})
+        return products
+
 
 
 

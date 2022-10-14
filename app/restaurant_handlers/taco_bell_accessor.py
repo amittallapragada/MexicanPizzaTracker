@@ -40,10 +40,19 @@ class TacoBellStore(Store):
     
     def has_item(self, item_id):
         if self.menu == None:
-            return False
+            return "Inconclusive"
         product = first(x for x in self.menu if x["code"] == item_id)
         if product:
             return True
+        else:
+            return False
+    
+    def get_item(self, item_id):
+        if self.menu == None:
+            return False
+        product = first(x for x in self.menu if x["code"] == item_id)
+        if product:
+            return product
         else:
             return False
 
@@ -51,25 +60,33 @@ class TacoBellStore(Store):
         try:
             resp = requests.get(STORE_MENU_URL+self.store_id, headers=TACO_BELL_HEADERS) 
             resp_data = resp.json()
-            taco_bell_products = resp_data["menuProductCategories"][0]["products"]
+            taco_bell_categories = resp_data["menuProductCategories"]
+            taco_bell_products = []
+            for category in taco_bell_categories:
+                if 'products' in category.keys():
+                    taco_bell_products.extend(category['products'])
             return taco_bell_products
         except Exception as e:
             print(e, "something went wrong, ", self.store_id)
             return None 
 
+    
 class TacoBellZipCodeResults(ZipCodeResults):
     def __init__(self, zip_code=None, lat=None, lon=None):
         self.zip_code = zip_code
         self.lat = lat
         self.lon = lon
-    
+        
     def create_store(self, store):
         current_store = TacoBellStore(store_id=store["storeNumber"], lat=store["geoPoint"]["latitude"], lon=store["geoPoint"]["longitude"], address=store['address']['line1'])
         return current_store
+        
     @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
-    def get_stores(self, zip_code):
-        if not zip_code:
+    def get_stores(self, zip_code=None, lat=None, lon=None):
+        if not zip_code and not lat and not lon:
             locn = get_lat_lon_from_zip_code(self.zip_code)
+        elif not zip_code and lat and lon:
+            locn = [lat, lon]
         else:
             locn = get_lat_lon_from_zip_code(zip_code)
         resp = requests.get(STORE_LOCATOR_URL, params={"latitude":locn[0], "longitude":locn[1]}, headers=TACO_BELL_HEADERS)
@@ -86,4 +103,19 @@ class TacoBellZipCodeResults(ZipCodeResults):
                 for task in as_completed(threads):
                     parsed_stores.append(task.result())
             return parsed_stores
+    
+    @cachetools.func.ttl_cache(maxsize=128, ttl=10 * 60)      
+    def get_default_menu(self):
+        try:
+            resp = requests.get(STORE_MENU_URL + "0000", headers=TACO_BELL_HEADERS) 
+            resp_data = resp.json()
+            taco_bell_products_categorites = resp_data["menuProductCategories"]
+            products = []
+            for category in taco_bell_products_categorites:
+                for product in category['products']:
+                    products.append({"name":product["name"], "value":product["code"]})
+            return products
+        except Exception as e:
+            print(e, "something went wrong, ")
+            return None 
     

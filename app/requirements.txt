@@ -35,3 +35,11 @@ Werkzeug==2.0.3
 xmltodict==0.13.0
 zipp==3.7.0
 cachetools==3.1.1
+flask-cors
+python-dotenv
+mongoengine
+uuid
+mjml==0.8.0
+jinja2
+flask-admin==1.6.0
+flask-mongoengine==1.0.0

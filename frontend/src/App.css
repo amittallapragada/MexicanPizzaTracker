@@ -1,0 +1,125 @@
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
+  padding-top:5px;
+
+}
+
+.markercluster-map {
+  width:90%;
+  height: 70vh;
+  align-items: center;
+  margin: auto;
+  margin-top:10px;
+  z-index: 100;
+  position: relative;
+}
+
+
+.map-input {
+  margin-top:10px;
+  padding-bottom:10px;
+  z-index: 0;
+  position: relative;
+
+}
+
+.hero {
+  padding-top: 20px;
+  text-align: center;
+  align-items: center;
+  margin: auto;
+  font-size: 30px;
+  font-weight: 600;
+  font-family: 'Angkor';
+  /* font-family: 'Raleway, sans-serif'; */
+  color: #380E66;
+}
+
+.popup-header{
+  font-size: 30px;
+  font-weight: 600;
+  font-family: 'Angkor';
+  color: #380E66;
+}
+.submit-button{
+  background: #380E66;
+}
+.nav{
+  /* background-color: #5b21b6; */
+  margin-left:10px;
+  padding-top:5px;
+  padding-bottom: 10px;
+  padding-right:10px;
+  /* box-shadow: 2px 2px white; */
+}
+
+.loading-spinner {
+  margin-top:10px;
+  padding-bottom:0px;
+}
+
+.alert {
+  margin-top:10px;
+  padding-bottom:2px;
+}
+
+.App{
+  /* background-color: #111827; */
+  position:absolute;
+  top:0px;
+  right:0px;
+  bottom:0px;
+  left:0px;
+}
+
+.leaflet-div-icon{ 
+  background-color: transparent !important; 
+  border-color: transparent !important;
+}
+
+.leaflet-marker-icon{ 
+  background-color: transparent !important; 
+  border-color: transparent !important;
+}
+
+.btn-flat {
+  background-color: purple;
+  color: white;
+}
+
+.modal {
+  font-size: 12px;
+}
+.modal > .header {
+  width: 100%;
+  border-bottom: 1px solid gray;
+  font-size: 18px;
+  text-align: center;
+  padding: 5px;
+}
+.modal > .content {
+  width: 100%;
+  padding: 10px 5px;
+}
+.modal > .actions {
+  width: 100%;
+  padding: 10px 5px;
+  margin: auto;
+  text-align: center;
+}
+.modal > .close {
+  cursor: pointer;
+  position: absolute;
+  display: block;
+  padding: 2px 5px;
+  line-height: 20px;
+  right: -10px;
+  top: -10px;
+  font-size: 24px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #cfcece;
+}

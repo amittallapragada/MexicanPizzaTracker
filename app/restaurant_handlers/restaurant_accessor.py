@@ -1,18 +1,4 @@
-from restaurant_handlers.mexican_pizza_utils import *
 from functools import lru_cache
-
-
-# product = {'store' : store name, 'product_name' : mexican nuts}
-
-
-def get_stores_for_product_by_zip_code(zip_code, product):
-    store_name = product['store']
-    product_name = product['product_name']
-    if store_name == "Taco Bell" and product_name == "Mexican Pizza":
-        return return_fmt_mexican_pizza_resp_by_zip_code(zip_code)
-
-
-# def get_menu_drop_down(zip_code, store):
 
 class Item:
     def __init__(self, name, store, item_ids, icon):
@@ -20,6 +6,14 @@ class Item:
         self.store = store
         self.item_ids = item_ids
         self.icon = icon 
+    
+    def to_dict(self):
+        return {
+            "name":self.name,
+            "store":self.store,
+            "item_ids":self.item_ids,
+            "icon":self.icon
+        }
     
 
 class Store:
@@ -50,11 +44,19 @@ class ZipCodeResults:
         self.lat = lat
         self.lon = lon 
     
-    def get_stores(self, zip_code):
+    def get_stores(self, zip_code=None, lat=None, long=None):
         pass 
 
-    def get_stores_with_item(self, item_id, zip_code):
-        stores = self.get_stores(zip_code)
+    def get_default_menu(self):
+        pass
+
+    def get_stores_with_item(self, item_id, zip_code=None, lat=None, lon=None):
+        if zip_code:
+            stores = self.get_stores(zip_code=zip_code)
+        elif lat != None and lon != None:
+            stores = self.get_stores(lat=lat, lon=lon)
+        if type(stores) == dict and 'error' in stores.keys():
+            return stores 
         output = [ {**store.to_dict(), **{"available":store.has_item(item_id)}} for store in stores]
         return output 
 
